@@ -32,3 +32,8 @@ def sep_t(dumpfile_list):
     
     return time, x_sep, y_sep, z_sep, r_sep
 
+
+if __name__ == "__main__":
+    time, x_sep, y_sep, z_sep, r_sep = sep_t(dump_list)
+    plt.plot(time, r_sep)
+    plt.show()

@@ -40,3 +40,7 @@ def tot_potential(dumpfile_list):
         print('file: ',file_name)
     return time, potential
 
+if __name__ == "__main__":
+    time, sink_potential = tot_potential(dump_list)
+    plt.plot(time, sink_potential)
+    plt.show()
