@@ -21,11 +21,11 @@ def sep_t(dumpfile_list):
     for dump in dumpfile_list:
         file_name = dump.split('/',-1)[-1]
         sdf, sdf_sinks = sar.read_phantom(dump)
-        x = sdf_sinks['x'][1] - sdf_sinks['x'][0]
-        y = sdf_sinks['y'][1] - sdf_sinks['y'][0]
-        z = sdf_sinks['z'][1] - sdf_sinks['z'][0]
-        r = np.sqrt(x**2 + y**2 + z**2)
-        x_sep, y_sep, z_sep = np.append(x_sep,x) , np.array(y_sep,y), np.array(z_sep,z)
+        x_sinks = sdf_sinks['x'][1] - sdf_sinks['x'][0]
+        y_sinks = sdf_sinks['y'][1] - sdf_sinks['y'][0]
+        z_sinks = sdf_sinks['z'][1] - sdf_sinks['z'][0]
+        r = np.sqrt(x_sinks**2 + y_sinks**2 + z_sinks**2)
+        x_sep, y_sep, z_sep = np.append(x_sep,x_sinks) , np.array(y_sep,y_sinks), np.array(z_sep,z_sinks)
         r_sep = np.append(r_sep,r)
         time = np.append(time,sdf.params['time'])
         print('file: ',file_name)
