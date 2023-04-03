@@ -17,9 +17,10 @@ def p_soft(q):
     p_soft = p_soft + 165.*np.power(q,2)/128. - 55./32.
     return p_soft
 
-def sink_gas_potential(m_sink,h_soft,r):
-    q = r/h_soft
-    p_lowq = p_soft(q[q < 2])*m_sink/h_soft
+def sink_gas_potential(m_sink,h_isoft,r):
+    r = np.sqrt(np.square(r) + 2.2204460492503131E-016)
+    q = r/h_isoft
+    p_lowq = p_soft(q[q < 2])*m_sink/h_isoft
     p_highq = -m_sink/r[q > 2]
     pot = p_lowq.add(p_highq,fill_value=0)
     return pot
@@ -43,12 +44,15 @@ def tot_potential(dumpfile_list):
         r_sinks = np.sqrt(x_sinks**2 + y_sinks**2 + z_sinks**2)
         r1 = np.sqrt(np.square(x1) + np.square(y1) + np.square(z1))
         r2 = np.sqrt(np.square(x2) + np.square(y2) + np.square(z2))
-        phi = - (sdf_sinks['m'][0]/r1).sum() - (sdf_sinks['m'][1]/r2).sum()
-        phi1 = sink_gas_potential(sdf_sinks['m'][0],sdf_sinks['hsoft'][0],r1).sum()
-        phi2 = sink_gas_potential(sdf_sinks['m'][1],sdf_sinks['hsoft'][1],r2).sum()
+        sdf.loc[sdf['h'] < sdf_sinks['hsoft'][0],'hs1'] = sdf_sinks['hsoft'][0]
+        sdf.loc[sdf['h'] > sdf_sinks['hsoft'][0],'hs1'] = sdf['h']
+        sdf.loc[sdf['h'] < sdf_sinks['hsoft'][1],'hs2'] = sdf_sinks['hsoft'][1]
+        sdf.loc[sdf['h'] > sdf_sinks['hsoft'][1],'hs2'] = sdf['h']
+        phi1 = sink_gas_potential(sdf_sinks['m'][0],sdf['hs1'],r1).sum()
+        phi2 = sink_gas_potential(sdf_sinks['m'][1],sdf['hs2'],r2).sum()
         pot_bet_sinks = -(sdf_sinks['m'][0]*sdf_sinks['m'][1])/r_sinks
         potential = np.append(potential, particlemass*(phi1+phi2) + sdf['poten'].sum() + pot_bet_sinks)
-        #potential = np.append(potential, pot_bet_sinks)
+
         time = np.append(time,sdf.params['time'])
         print('file: ',file_name)
     return time, potential
@@ -57,6 +61,8 @@ if __name__ == "__main__":
     path_dumpfiles = '/media/miguelgb/drive2/Dust/Datafiles/A_tccclsax_boundmax/'
     dump_list = read_dumpfiles(path=path_dumpfiles)
     time, sink_potential = tot_potential(dump_list)
+    ph_data = dr.phantom_evdata('energy.ev')
     plt.plot(time, sink_potential)
+    plt.plot(ph_data['time'], ph_data['pot energy'])
     plt.show()
 

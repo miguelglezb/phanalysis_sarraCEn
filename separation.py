@@ -10,10 +10,6 @@ import sarracen as sar
 from rdumpfiles import read_dumpfiles
 
 
-path_dumpfiles = '/media/miguelgb/drive2/Dust/Datafiles/A_ccc/'
-dump_list = read_dumpfiles(path=path_dumpfiles)
-
-
 def sep_t(dumpfile_list):
     time = np.array([])
     x_sep, y_sep, z_sep = np.array([]), np.array([]), np.array([])
@@ -34,6 +30,10 @@ def sep_t(dumpfile_list):
 
 
 if __name__ == "__main__":
+    path_dumpfiles = '/media/miguelgb/drive2/Dust/Datafiles/A_ccc/'
+    dump_list = read_dumpfiles(path=path_dumpfiles)
     time, x_sep, y_sep, z_sep, r_sep = sep_t(dump_list)
+    ph_data = dr.phantom_evdata('separation_vs_time.ev')
     plt.plot(time, r_sep)
+    plt.plot(ph_data['time'],ph_data['sep. 1'])
     plt.show()
