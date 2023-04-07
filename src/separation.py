@@ -7,7 +7,7 @@ import dataread as dr
 from matplotlib import rc
 from matplotlib import rcParams
 import sarracen as sar
-from rdumpfiles import read_dumpfiles
+from utils.rdumpfiles import read_dumpfiles
 
 
 def sep_t(dumpfile_list):
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     path_dumpfiles = '/media/miguelgb/drive2/Dust/Datafiles/A_ccc/'
     dump_list = read_dumpfiles(path=path_dumpfiles)
     time, x_sep, y_sep, z_sep, r_sep = sep_t(dump_list)
-    ph_data = dr.phantom_evdata('separation_vs_time.ev')
+    ph_data = dr.phantom_evdata('data/external/separation_vs_time.ev')
     plt.plot(time, r_sep)
     plt.plot(ph_data['time'],ph_data['sep. 1'])
     plt.show()

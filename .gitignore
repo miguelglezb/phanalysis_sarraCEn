@@ -1,3 +1,2 @@
 analysis_sarraCEn.code-workspace
-*ev
-__pycache__/
+data/external/*

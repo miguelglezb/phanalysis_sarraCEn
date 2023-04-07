@@ -19,6 +19,7 @@ def read_dumpfiles(files_sufix='binary_', path='./', evy_nfile=-1):
         If -1, it will take the path of every single dumpfile with
         files_sufix in the path. For any other positive integer, it
         will take every evy_files to generate the list
+        
     Returns
     -------
     List of strings (dumpfile names, including path)
