@@ -8,5 +8,5 @@ import dataread as dr
 def recentre_from_sink(sdf,sdf_sinks,columns=['x','y','z'],sink=0):
     rct = []
     for i in columns:
-        rct.append(sdf[i][sink] - sdf_sinks[i][sink])
+        rct.append(sdf[i] - sdf_sinks[i][sink])
     return rct

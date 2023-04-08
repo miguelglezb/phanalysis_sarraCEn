@@ -45,9 +45,9 @@ def sink_gas_potential(m_sink,h_isoft,r):
     '''
 
     q = r/h_isoft
-    p_lowq = p_soft(q[q <= 2])*m_sink/h_isoft
-    p_highq = -m_sink/r[q > 2]
-    pot = p_lowq.add(p_highq,fill_value=0)
+    p_lowq = p_soft(q)*m_sink/h_isoft
+    p_highq = -m_sink/r
+    pot = p_lowq.where(q<2,p_highq)
     return pot
 
 # Calculation of gravitational potential energy for the entire envelope 
@@ -61,28 +61,20 @@ def tot_potential(dumpfile_list):
         particlemass = sdf.params['mass']
         [x1, y1, z1] = recentre_from_sink(sdf,sdf_sinks,sink=0)
         [x2, y2, z2] = recentre_from_sink(sdf,sdf_sinks,sink=1)
-        #x1 = sdf['x'] - sdf_sinks['x'][0]
-        #y1 = sdf['y'] - sdf_sinks['y'][0]
-        #z1 = sdf['z'] - sdf_sinks['z'][0]
-        #x2 = sdf['x'] - sdf_sinks['x'][1]
-        #y2 = sdf['y'] - sdf_sinks['y'][1]
-        #z2 = sdf['z'] - sdf_sinks['z'][1]
         x_sinks = sdf_sinks['x'][1] - sdf_sinks['x'][0]
         y_sinks = sdf_sinks['y'][1] - sdf_sinks['y'][0]
         z_sinks = sdf_sinks['z'][1] - sdf_sinks['z'][0]
         r_sinks = np.sqrt(x_sinks**2 + y_sinks**2 + z_sinks**2)
         r1 = np.sqrt(np.square(x1) + np.square(y1) + np.square(z1))
         r2 = np.sqrt(np.square(x2) + np.square(y2) + np.square(z2))
-        sdf.loc[sdf['h'] < sdf_sinks['hsoft'][0],'hs1'] = sdf_sinks['hsoft'][0]
-        sdf.loc[sdf['h'] > sdf_sinks['hsoft'][0],'hs1'] = sdf['h']
-        sdf.loc[sdf['h'] < sdf_sinks['hsoft'][1],'hs2'] = sdf_sinks['hsoft'][1]
-        sdf.loc[sdf['h'] > sdf_sinks['hsoft'][1],'hs2'] = sdf['h']
+        sdf['hs1'] = sdf['h'].where(sdf['h'] > sdf_sinks['hsoft'][0], sdf_sinks['hsoft'][0])
+        sdf['hs2'] = sdf['h'].where(sdf['h'] > sdf_sinks['hsoft'][1], sdf_sinks['hsoft'][1])
         phi1 = sink_gas_potential(sdf_sinks['m'][0],sdf['hs1'],r1).sum()
         phi2 = sink_gas_potential(sdf_sinks['m'][1],sdf['hs2'],r2).sum()
         pot_bet_sinks = -(sdf_sinks['m'][0]*sdf_sinks['m'][1])/r_sinks
         tot_pot = particlemass*(phi1 + phi2) + sdf['poten'].sum() + pot_bet_sinks
         potential = np.append(potential, tot_pot)
-
+ 
         time = np.append(time,sdf.params['time'])
         print('file: ',file_name)
     return time, potential
@@ -97,8 +89,7 @@ def tot_kinetic(dumpfile_list):
         v2_sink1 = sdf_sinks['vx'][0]**2 + sdf_sinks['vy'][0]**2 + sdf_sinks['vz'][0]**2
         v2_sink2 = sdf_sinks['vx'][1]**2 + sdf_sinks['vy'][1]**2 + sdf_sinks['vz'][1]**2
         v2_gas = np.sum(sdf['vx']**2 + sdf['vy']**2 + sdf['vz']**2)
-        #kin = 0.5*(particlemass*v2_gas + sdf_sinks['m'][0]*v2_sink1 + sdf_sinks['m'][1]*v2_sink2)
-        kin = 0.5*(sdf_sinks['m'][0]*v2_sink1 + sdf_sinks['m'][1]*v2_sink2) 
+        kin = 0.5*(particlemass*v2_gas + sdf_sinks['m'][0]*v2_sink1 + sdf_sinks['m'][1]*v2_sink2)
         kinetic = np.append(kinetic, kin)
 
         time = np.append(time,sdf.params['time'])
@@ -107,13 +98,13 @@ def tot_kinetic(dumpfile_list):
 
 if __name__ == "__main__":
     path_dumpfiles = '/media/miguelgb/drive2/Dust/Datafiles/A_tccclsax_boundmax/'
-    dump_list = read_dumpfiles(path=path_dumpfiles,evy_nfile=20)
-#    time, sink_potential = tot_potential(dump_list)
-    time, total_kinetic = tot_kinetic(dump_list)
+    dump_list = read_dumpfiles(path=path_dumpfiles)
+    time, sink_potential = tot_potential(dump_list)
+    #time, total_kinetic = tot_kinetic(dump_list)
     ph_data = dr.phantom_evdata('data/external/energy.ev')
-    plt.plot(time, total_kinetic)
+    #plt.plot(time, total_kinetic)
     #plt.plot(time, sink_potential)
     #plt.plot(ph_data['time'], ph_data['pot energy'])
-    plt.plot(ph_data['time'], ph_data['sink kin'])
+    plt.plot(ph_data['time'], 100*abs((sink_potential - ph_data['pot energy'])/ph_data['pot energy']))
     plt.show()
 
