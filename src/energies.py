@@ -43,7 +43,6 @@ def sink_gas_potential(m_sink,h_isoft,r):
     -------
     float, list, pandas.series (same type as q)
     '''
-
     q = r/h_isoft
     p_lowq = p_soft(q)*m_sink/h_isoft
     p_highq = -m_sink/r
@@ -53,6 +52,20 @@ def sink_gas_potential(m_sink,h_isoft,r):
 # Calculation of gravitational potential energy for the entire envelope 
 # (assuming 2 sink particles and )
 def tot_potential(dumpfile_list):
+    '''
+    Calculation of total gravitational potential energy in the common envelope,
+    including sink-sink, sink-gas and gas-gas potential over time.    
+    
+    Parameter 
+    ----------
+    dumpfile_list : list
+       list of paths of the dumpfiles of the simulation 
+
+    Returns
+    -------
+    Two arrays of floats with time and total potential energies.
+
+    '''
     time = np.array([])
     potential = np.array([])
     for dump in dumpfile_list:
@@ -80,6 +93,20 @@ def tot_potential(dumpfile_list):
     return time, potential
 
 def tot_kinetic(dumpfile_list):
+    '''
+    Calculation of total kinetic energy in the common envelope, including 
+    sink-sink, sink-gas and gas-gas potential over time        
+    
+    Parameter 
+    ----------
+    dumpfile_list : list
+       list of paths of the dumpfiles of the simulation 
+
+    Returns
+    -------
+    Two arrays of floats with time and total kinetic energies.
+    '''
+
     time = np.array([])
     kinetic = np.array([])
     for dump in dumpfile_list:
@@ -103,8 +130,8 @@ if __name__ == "__main__":
     #time, total_kinetic = tot_kinetic(dump_list)
     ph_data = dr.phantom_evdata('data/external/energy.ev')
     #plt.plot(time, total_kinetic)
-    #plt.plot(time, sink_potential)
-    #plt.plot(ph_data['time'], ph_data['pot energy'])
-    plt.plot(ph_data['time'], 100*abs((sink_potential - ph_data['pot energy'])/ph_data['pot energy']))
+    plt.plot(time, sink_potential)
+    plt.plot(ph_data['time'], ph_data['pot energy'])
+    #plt.plot(ph_data['time'], 100*abs((sink_potential - ph_data['pot energy'])/ph_data['pot energy']))
     plt.show()
 
